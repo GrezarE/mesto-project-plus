@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
-import { IUser } from './user';
 import isURL from 'validator/lib/isURL';
+import { IUser } from './user';
 
 const User = mongoose.model('user');
 

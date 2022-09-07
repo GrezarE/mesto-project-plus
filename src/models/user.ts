@@ -10,6 +10,7 @@ export interface IUser {
 const UserShema = new mongoose.Schema<IUser>({
   name: {
     type: String,
+    unique: true,
     minlength: 2,
     maxlength: 30,
     required: true,
@@ -30,4 +31,4 @@ const UserShema = new mongoose.Schema<IUser>({
   },
 });
 
-export default mongoose.model('user', UserShema);
+export default mongoose.model<IUser>('User', UserShema);
