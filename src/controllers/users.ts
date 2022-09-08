@@ -37,7 +37,7 @@ export const getUserById = (req: Request, res: Response) => {
       if (!user) {
         res
           .status(NOT_FOUND)
-          .send({ message: 'Пользователь по указанному _id не найден' });
+          .send({ message: 'Пользователь по указанному id не найден' });
       } else {
         res.send(user);
       }
@@ -46,7 +46,7 @@ export const getUserById = (req: Request, res: Response) => {
       if (err.name === 'CastError') {
         res
           .status(BAD_REQUEST)
-          .send({ message: '_id пользователя не прошло валидацию' });
+          .send({ message: 'Id пользователя не прошло валидацию' });
       } else {
         res.status(SERVER_ERROR).send({ message: 'Произошла ошибка' });
       }
@@ -66,7 +66,7 @@ export const patchUser = (req: Request, res: Response) => {
       if (!user) {
         res
           .status(NOT_FOUND)
-          .send({ message: 'Пользователь по указанному _id не найден' });
+          .send({ message: 'Пользователь по указанному id не найден' });
       } else {
         res.send(user);
       }
@@ -91,7 +91,7 @@ export const patchAvatar = (req: Request, res: Response) => {
       if (!user) {
         res
           .status(NOT_FOUND)
-          .send({ message: 'Пользователь по указанному _id не найден' });
+          .send({ message: 'Пользователь по указанному id не найден' });
       } else {
         res.send(user);
       }
