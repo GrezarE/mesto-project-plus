@@ -7,7 +7,7 @@ export interface IUser {
   avatar: string;
 }
 
-const UserShema = new mongoose.Schema<IUser>({
+export const UserShema = new mongoose.Schema<IUser>({
   name: {
     type: String,
     unique: true,

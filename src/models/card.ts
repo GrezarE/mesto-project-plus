@@ -1,14 +1,12 @@
-import mongoose from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 import isURL from 'validator/lib/isURL';
-import { IUser } from './user';
-
-const User = mongoose.model('user');
+import User from './user';
 
 interface ICard {
   name: string;
   link: string;
-  owner: IUser;
-  likes: [];
+  owner: Schema.Types.ObjectId;
+  likes: Schema.Types.ObjectId[];
   createdAt: Date;
 }
 
@@ -27,12 +25,16 @@ const CardShema = new mongoose.Schema<ICard>({
       message: 'must be valid url',
     },
   },
-  owner: { User, required: true },
-  likes: [{ User, default: [] }],
+  owner: {
+    type: Schema.Types.ObjectId,
+    ref: User,
+    required: true,
+  },
+  likes: [{ type: Schema.Types.ObjectId, ref: User, default: [] }],
   createdAt: {
     type: Date,
     default: Date.now,
   },
 });
 
-export default mongoose.model('card', CardShema);
+export default mongoose.model<ICard>('card', CardShema);

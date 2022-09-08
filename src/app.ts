@@ -1,6 +1,7 @@
 import express, { NextFunction, Request, Response } from 'express';
 import mongoose from 'mongoose';
 import userRouter from './routes/users';
+import cardRouter from './routes/cards';
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
@@ -19,8 +20,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-app.use('/', userRouter);
+app.use('/users', userRouter);
 
-const server = app.listen(PORT, () => {
-  console.log('Started');
-});
+app.use('/cards', cardRouter);
+
+app.listen(PORT);
