@@ -5,28 +5,18 @@ import User from '../models/user';
 export const createUser = (req: Request, res: Response) => {
   const { name, about, avatar } = req.body;
 
-  if (!name) {
-    res
-      .status(BAD_REQUEST)
-      .send({ message: 'Поле name не должно быть пустым' });
-  }
-  if (!about) {
-    res
-      .status(BAD_REQUEST)
-      .send({ message: 'Поле about не должно быть пустым' });
-  }
-  if (!avatar) {
-    res
-      .status(BAD_REQUEST)
-      .send({ message: 'Поле avatar не должно быть пустым' });
-  }
-
   User.create({ name, about, avatar })
     .then((user) => {
       res.send(user);
     })
-    .catch(() => {
-      res.status(SERVER_ERROR).send({ message: 'Произошла ошибка' });
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(BAD_REQUEST).send({
+          message: 'Переданы некорректные данные при создании пользователя',
+        });
+      } else {
+        res.status(SERVER_ERROR).send({ message: 'Произошла ошибка сервера' });
+      }
     });
 };
 
@@ -52,8 +42,14 @@ export const getUserById = (req: Request, res: Response) => {
         res.send(user);
       }
     })
-    .catch(() => {
-      res.status(SERVER_ERROR).send({ message: 'Произошла ошибка' });
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res
+          .status(BAD_REQUEST)
+          .send({ message: '_id пользователя не прошло валидацию' });
+      } else {
+        res.status(SERVER_ERROR).send({ message: 'Произошла ошибка' });
+      }
     });
 };
 
@@ -61,21 +57,10 @@ export const patchUser = (req: Request, res: Response) => {
   const id = req.user?._id;
   const { name, about } = req.body;
 
-  if (!name) {
-    res
-      .status(BAD_REQUEST)
-      .send({ message: 'Поле name не должно быть пустым' });
-  }
-  if (!about) {
-    res
-      .status(BAD_REQUEST)
-      .send({ message: 'Поле about не должно быть пустым' });
-  }
-
   User.findByIdAndUpdate(
     id,
     { name, about },
-    { new: true, runValidators: true },
+    { new: true, runValidators: true }
   )
     .then((user) => {
       if (!user) {
@@ -86,20 +71,20 @@ export const patchUser = (req: Request, res: Response) => {
         res.send(user);
       }
     })
-    .catch(() => {
-      res.status(SERVER_ERROR).send({ message: 'Произошла ошибка' });
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(BAD_REQUEST).send({
+          message: 'Переданы некорректные данные при изменении пользователя',
+        });
+      } else {
+        res.status(SERVER_ERROR).send({ message: 'Произошла ошибка сервера' });
+      }
     });
 };
 
 export const patchAvatar = (req: Request, res: Response) => {
   const id = req.user?._id;
   const { avatar } = req.body;
-
-  if (!avatar) {
-    res
-      .status(BAD_REQUEST)
-      .send({ message: 'Поле avatar не должно быть пустым' });
-  }
 
   User.findByIdAndUpdate(id, { avatar }, { new: true, runValidators: true })
     .then((user) => {
@@ -111,7 +96,13 @@ export const patchAvatar = (req: Request, res: Response) => {
         res.send(user);
       }
     })
-    .catch(() => {
-      res.status(SERVER_ERROR).send({ message: 'Произошла ошибка' });
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(BAD_REQUEST).send({
+          message: 'Переданы некорректные данные при изменении аватара',
+        });
+      } else {
+        res.status(SERVER_ERROR).send({ message: 'Произошла ошибка сервера' });
+      }
     });
 };

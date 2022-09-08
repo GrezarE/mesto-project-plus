@@ -10,7 +10,6 @@ export interface IUser {
 export const UserShema = new mongoose.Schema<IUser>({
   name: {
     type: String,
-    unique: true,
     minlength: 2,
     maxlength: 30,
     required: true,
