@@ -128,7 +128,7 @@ export const loginUser = (req: Request, res: Response) => {
       });
     })
     .catch((err) => {
-      res.status(401).send({ message: err.message });
+      res.status(UNAUTHORIZED).send({ message: err.message });
     });
 
   // User.findOne({ email })

@@ -2,6 +2,7 @@ import express, { NextFunction, Request, Response } from 'express';
 import mongoose from 'mongoose';
 import userRouter from './routes/users';
 import cardRouter from './routes/cards';
+import errorHandler from './middlewares/errors';
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
@@ -23,5 +24,7 @@ app.use(express.json());
 app.use('/users', userRouter);
 
 app.use('/cards', cardRouter);
+
+app.use(errorHandler);
 
 app.listen(PORT);
