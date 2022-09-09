@@ -1,11 +1,20 @@
 import { Request, Response } from 'express';
-import { BAD_REQUEST, NOT_FOUND, SERVER_ERROR } from '../utiles/constants';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import {
+  BAD_REQUEST,
+  NOT_FOUND,
+  SERVER_ERROR,
+  UNAUTHORIZED,
+} from '../utiles/constants';
 import User from '../models/user';
 
 export const createUser = (req: Request, res: Response) => {
-  const { name, about, avatar } = req.body;
+  const { name, about, avatar, password, email } = req.body;
 
-  User.create({ name, about, avatar })
+  bcrypt
+    .hash(password, 15)
+    .then((hash) => User.create({ name, about, avatar, password: hash, email }))
     .then((user) => {
       res.send(user);
     })
@@ -105,4 +114,44 @@ export const patchAvatar = (req: Request, res: Response) => {
         res.status(SERVER_ERROR).send({ message: 'Произошла ошибка сервера' });
       }
     });
+};
+
+export const loginUser = (req: Request, res: Response) => {
+  const { email, password } = req.body;
+
+  User.findUserByCredentials(email, password)
+    .then((user) => {
+      res.send({
+        token: jwt.sign({ _id: user._id }, 'some-secret-key', {
+          expiresIn: '7d',
+        }),
+      });
+    })
+    .catch((err) => {
+      res.status(401).send({ message: err.message });
+    });
+
+  // User.findOne({ email })
+  //   .then((user) => {
+  //     if (!user) {
+  //       res
+  //         .status(NOT_FOUND)
+  //         .send({ message: 'Неправильные почта или пароль' });
+  //     } else {
+  //       return bcrypt.compare(password, user.password);
+  //     }
+  //   })
+  //   .then((matched) => {
+  //     if (!matched) {
+  //       res
+  //         .status(NOT_FOUND)
+  //         .send({ message: 'Неправильные почта или пароль' });
+  //     } else {
+  //       res.send({
+  //         token: jwt.sign({ _id: user._id }, 'super-strong-secret', {
+  //           expiresIn: '7d',
+  //         }),
+  //       });
+  //     }
+  //   });
 };
