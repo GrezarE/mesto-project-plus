@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import userRouter from './routes/users';
 import cardRouter from './routes/cards';
 import errorHandler from './middlewares/errors';
+import { errors } from 'celebrate';
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
@@ -25,6 +26,7 @@ app.use('/users', userRouter);
 
 app.use('/cards', cardRouter);
 
+app.use(errors());
 app.use(errorHandler);
 
 app.listen(PORT);

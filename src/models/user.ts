@@ -37,6 +37,7 @@ export const UserShema = new mongoose.Schema<IUser>({
   password: {
     type: String,
     required: true,
+    minlength: 8,
     // select: false
   },
   about: {

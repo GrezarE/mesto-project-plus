@@ -1,22 +1,75 @@
 import { Router } from 'express';
+import { celebrate, Joi } from 'celebrate';
+
 import {
   getUsers,
   createUser,
   getUserById,
   patchUser,
   patchAvatar,
+  loginUser,
 } from '../controllers/users';
 
 const router = Router();
 
 router.get('/', getUsers);
 
-router.post('/', createUser);
+// router.post('/', createUser);
 
-router.get('/:userId', getUserById);
+router.post(
+  '/signup',
+  celebrate({
+    body: Joi.object().keys({
+      name: Joi.string().min(2).max(30),
+      email: Joi.string().required(),
+      password: Joi.string().required().min(8),
+      about: Joi.string().min(2).max(200),
+      avatar: Joi.string(),
+    }),
+  }),
+  createUser
+);
 
-router.patch('/me', patchUser);
+router.post(
+  '/singin',
+  celebrate({
+    body: Joi.object().keys({
+      email: Joi.string().required(),
+      password: Joi.string().required().min(8),
+    }),
+  }),
+  loginUser
+);
 
-router.patch('/me/avatar', patchAvatar);
+router.get(
+  '/:userId',
+  celebrate({
+    params: Joi.object().keys({
+      userId: Joi.string().required(),
+    }),
+  }),
+  getUserById
+);
+
+router.patch(
+  '/me',
+  celebrate({
+    body: Joi.object().keys({
+      name: Joi.string().min(2).max(30),
+      about: Joi.string().min(2).max(200),
+    }),
+  }),
+  patchUser
+);
+
+router.patch(
+  '/me/avatar',
+  celebrate({
+    body: Joi.object().keys({
+      avatar: Joi.string().required(),
+    }),
+  }),
+  patchAvatar
+);
 
 export default router;
