@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { HttpError } from '../errors/index';
 
 export default (
   err: HttpError,

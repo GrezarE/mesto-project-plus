@@ -4,6 +4,8 @@ import userRouter from './routes/users';
 import cardRouter from './routes/cards';
 import errorHandler from './middlewares/errors';
 import { errors } from 'celebrate';
+import auth from './middlewares/auth';
+import authRouter from './routes/auth';
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
@@ -11,16 +13,20 @@ const { PORT = 3000 } = process.env;
 
 const app = express();
 
-app.use((req: Request, res: Response, next: NextFunction) => {
-  req.user = {
-    _id: '6317e18abc3dfef49e0183c8', // вставьте сюда _id созданного в предыдущем пункте пользователя
-  };
+// app.use((req: Request, res: Response, next: NextFunction) => {
+//   req.user = {
+//     _id: '6317e18abc3dfef49e0183c8', // вставьте сюда _id созданного в предыдущем пункте пользователя
+//   };
 
-  next();
-});
+//   next();
+// });
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+app.use('/', authRouter);
+
+app.use(auth);
 
 app.use('/users', userRouter);
 

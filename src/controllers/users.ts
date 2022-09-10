@@ -11,6 +11,8 @@ import User from '../models/user';
 
 export const createUser = (req: Request, res: Response) => {
   const { name, about, avatar, password, email } = req.body;
+  console.log(req.path);
+  console.log(req.body);
 
   bcrypt
     .hash(password, 15)
@@ -36,6 +38,30 @@ export const getUsers = (req: Request, res: Response) => {
     })
     .catch(() => {
       res.status(SERVER_ERROR).send({ message: 'Произошла ошибка' });
+    });
+};
+
+export const getMe = (req: Request, res: Response) => {
+  const id = req.user._id;
+  console.log(req.user._id)
+  User.findById(id)
+    .then((user) => {
+      if (!user) {
+        res
+          .status(NOT_FOUND)
+          .send({ message: 'Пользователь по указанному id не найден' });
+      } else {
+        res.send(user);
+      }
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res
+          .status(BAD_REQUEST)
+          .send({ message: 'Id пользователя не прошло валидацию' });
+      } else {
+        res.status(SERVER_ERROR).send({ message: 'Произошла ошибка' });
+      }
     });
 };
 
@@ -118,6 +144,7 @@ export const patchAvatar = (req: Request, res: Response) => {
 
 export const loginUser = (req: Request, res: Response) => {
   const { email, password } = req.body;
+  console.log(email, password)
 
   User.findUserByCredentials(email, password)
     .then((user) => {
@@ -128,6 +155,7 @@ export const loginUser = (req: Request, res: Response) => {
       });
     })
     .catch((err) => {
+      console.log(err);
       res.status(UNAUTHORIZED).send({ message: err.message });
     });
 

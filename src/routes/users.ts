@@ -8,38 +8,42 @@ import {
   patchUser,
   patchAvatar,
   loginUser,
+  getMe,
 } from '../controllers/users';
 
 const router = Router();
 
 router.get('/', getUsers);
 
+router.get('/me', getMe);
+
+
 // router.post('/', createUser);
 
-router.post(
-  '/signup',
-  celebrate({
-    body: Joi.object().keys({
-      name: Joi.string().min(2).max(30),
-      email: Joi.string().required(),
-      password: Joi.string().required().min(8),
-      about: Joi.string().min(2).max(200),
-      avatar: Joi.string(),
-    }),
-  }),
-  createUser
-);
+// router.post(
+//   '/signup',
+//   celebrate({
+//     body: Joi.object().keys({
+//       name: Joi.string().min(2).max(30),
+//       email: Joi.string().required(),
+//       password: Joi.string().required().min(8),
+//       about: Joi.string().min(2).max(200),
+//       avatar: Joi.string(),
+//     }),
+//   }),
+//   createUser
+// );
 
-router.post(
-  '/singin',
-  celebrate({
-    body: Joi.object().keys({
-      email: Joi.string().required(),
-      password: Joi.string().required().min(8),
-    }),
-  }),
-  loginUser
-);
+// router.post(
+//   '/singin',
+//   celebrate({
+//     body: Joi.object().keys({
+//       email: Joi.string().required(),
+//       password: Joi.string().required().min(8),
+//     }),
+//   }),
+//   loginUser
+// );
 
 router.get(
   '/:userId',
@@ -71,5 +75,6 @@ router.patch(
   }),
   patchAvatar
 );
+
 
 export default router;

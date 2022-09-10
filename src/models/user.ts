@@ -24,6 +24,7 @@ export const UserShema = new mongoose.Schema<IUser>({
     minlength: 2,
     maxlength: 30,
     default: 'Жак-Ив Кусто',
+    unique: false,
   },
   email: {
     type: String,
@@ -38,7 +39,7 @@ export const UserShema = new mongoose.Schema<IUser>({
     type: String,
     required: true,
     minlength: 8,
-    // select: false
+    select: false,
   },
   about: {
     type: String,
@@ -60,17 +61,19 @@ export const UserShema = new mongoose.Schema<IUser>({
 UserShema.static(
   'findUserByCredentials',
   function findUserByCredentials(email: string, password: string) {
-    return this.findOne({ email }).then((user: IUser) => {
-      if (!user) {
-        return Promise.reject(new Error('Неправильные почта или пароль'));
-      }
-      return bcrypt.compare(password, user.password).then((match) => {
-        if (!match) {
+    return this.findOne({ email })
+      .select('+password')
+      .then((user: IUser) => {
+        if (!user) {
           return Promise.reject(new Error('Неправильные почта или пароль'));
         }
-        return user;
+        return bcrypt.compare(password, user.password).then((match) => {
+          if (!match) {
+            return Promise.reject(new Error('Неправильные почта или пароль'));
+          }
+          return user;
+        });
       });
-    });
   }
 );
 
