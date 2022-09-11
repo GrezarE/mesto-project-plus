@@ -1,5 +1,10 @@
 import { Request, Response } from 'express';
-import { BAD_REQUEST, NOT_FOUND, SERVER_ERROR } from '../utiles/constants';
+import {
+  BAD_REQUEST,
+  NOT_FOUND,
+  SERVER_ERROR,
+  FORBIDDEN,
+} from '../utiles/constants';
 import Card from '../models/card';
 
 export const getCards = (req: Request, res: Response) => {
@@ -33,14 +38,35 @@ export const createCard = (req: Request, res: Response) => {
 
 export const deleteCard = (req: Request, res: Response) => {
   const { id } = req.params;
-  Card.findByIdAndRemove(id)
+  const userId = req.user._id;
+
+  Card.findById(id)
     .then((card) => {
-      if (!card) {
-        res
-          .status(NOT_FOUND)
-          .send({ message: 'Карточка с указанным id не найдена.' });
+      const cardId = card?.owner.toString();
+      if (cardId !== userId) {
+        res.status(FORBIDDEN).send({ message: 'Недостаточно прав' });
       } else {
-        res.send(card);
+        Card.findByIdAndRemove(id)
+          .then((card) => {
+            if (!card) {
+              res
+                .status(NOT_FOUND)
+                .send({ message: 'Карточка с указанным id не найдена.' });
+            } else {
+              res.send(card);
+            }
+          })
+          .catch((err) => {
+            if (err.name === 'CastError') {
+              res
+                .status(BAD_REQUEST)
+                .send({ message: 'Id карточки не прошло валидацию' });
+            } else {
+              res
+                .status(SERVER_ERROR)
+                .send({ message: 'Произошла ошибка сервера' });
+            }
+          });
       }
     })
     .catch((err) => {

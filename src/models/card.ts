@@ -21,7 +21,12 @@ const CardShema = new mongoose.Schema<ICard>({
     type: String,
     required: true,
     validate: {
-      validator: (v: string) => isURL(v),
+      // validator: (v: string) => isURL(v),
+      // message: 'must be valid url',
+      validator: (v: string) =>
+        /^(https?:\/\/)(www\.)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w\.-]*)*\/?$/.test(
+          v
+        ),
       message: 'must be valid url',
     },
   },
