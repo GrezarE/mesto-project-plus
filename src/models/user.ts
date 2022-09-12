@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape, no-unused-vars */
 import mongoose, { Model, Document } from 'mongoose';
 import bcrypt from 'bcryptjs';
 // import isURL from 'validator/lib/isURL';
@@ -52,10 +53,7 @@ export const UserShema = new mongoose.Schema<IUser>({
     validate: {
       // validator: (v: string) => isURL(v),
       // message: 'must be valid url',
-      validator: (v: string) =>
-        /^(https?:\/\/)(www\.)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w\.-]*)*\/?$/.test(
-          v
-        ),
+      validator: (v: string) => /^(https?:\/\/)(www\.)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w\.-]*)*\/?$/.test(v),
       message: 'must be valid url',
     },
     default:
@@ -79,7 +77,7 @@ UserShema.static(
           return user;
         });
       });
-  }
+  },
 );
 
 export default mongoose.model<IUser, UserModel>('User', UserShema);

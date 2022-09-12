@@ -16,7 +16,7 @@ router.post(
       avatar: Joi.string(),
     }),
   }),
-  createUser
+  createUser,
 );
 
 router.post(
@@ -27,7 +27,7 @@ router.post(
       password: Joi.string().required().min(8),
     }),
   }),
-  loginUser
+  loginUser,
 );
 
 export default router;

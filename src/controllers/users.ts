@@ -6,27 +6,39 @@ import {
   BadRequestError,
   UnauthorizedError,
   NotFoundError,
+  ConflictError,
 } from '../errors/index';
 
 export const createUser = (req: Request, res: Response, next: NextFunction) => {
-  const { name, about, avatar, password, email } = req.body;
-
-  bcrypt
-    .hash(password, 15)
-    .then((hash) => User.create({ name, about, avatar, password: hash, email }))
+  const {
+    name, about, avatar, password, email,
+  } = req.body;
+  User.findOne({ email })
     .then((user) => {
-      res.send(user);
-    })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        const error = new BadRequestError(
-          'Переданы некорректные данные при создании пользователя'
-        );
-        next(error);
+      if (!user) {
+        bcrypt
+          .hash(password, 15)
+          .then((hash) => User.create({
+            name, about, avatar, password: hash, email,
+          }))
+          .then((newUser) => {
+            res.send(newUser);
+          })
+          .catch((err) => {
+            if (err.name === 'ValidationError') {
+              const error = new BadRequestError(
+                'Переданы некорректные данные при создании пользователя',
+              );
+              next(error);
+            } else {
+              next(err);
+            }
+          });
       } else {
-        next(err);
+        throw new ConflictError('Пользователь с такой почтой уже существует');
       }
-    });
+    })
+    .catch(next);
 };
 
 export const getUsers = (req: Request, res: Response, next: NextFunction) => {
@@ -50,7 +62,7 @@ export const getMe = (req: Request, res: Response, next: NextFunction) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         const error = new BadRequestError(
-          'Id пользователя не прошло валидацию'
+          'Id пользователя не прошло валидацию',
         );
         next(error);
       } else {
@@ -62,7 +74,7 @@ export const getMe = (req: Request, res: Response, next: NextFunction) => {
 export const getUserById = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const id = req.params.userId;
   User.findById(id)
@@ -76,7 +88,7 @@ export const getUserById = (
     .catch((err) => {
       if (err.name === 'CastError') {
         const error = new BadRequestError(
-          'Id пользователя не прошло валидацию'
+          'Id пользователя не прошло валидацию',
         );
         next(error);
       } else {
@@ -92,7 +104,7 @@ export const patchUser = (req: Request, res: Response, next: NextFunction) => {
   User.findByIdAndUpdate(
     id,
     { name, about },
-    { new: true, runValidators: true }
+    { new: true, runValidators: true },
   )
     .then((user) => {
       if (!user) {
@@ -104,7 +116,7 @@ export const patchUser = (req: Request, res: Response, next: NextFunction) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         const error = new BadRequestError(
-          'Переданы некорректные данные при изменении пользователя'
+          'Переданы некорректные данные при изменении пользователя',
         );
         next(error);
       } else {
@@ -116,7 +128,7 @@ export const patchUser = (req: Request, res: Response, next: NextFunction) => {
 export const patchAvatar = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const id = req.user?._id;
   const { avatar } = req.body;
@@ -132,7 +144,7 @@ export const patchAvatar = (
     .catch((err) => {
       if (err.name === 'ValidationError') {
         const error = new BadRequestError(
-          'Переданы некорректные данные при изменении пользователя'
+          'Переданы некорректные данные при изменении пользователя',
         );
         next(error);
       } else {

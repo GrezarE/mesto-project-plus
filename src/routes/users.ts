@@ -3,11 +3,9 @@ import { celebrate, Joi } from 'celebrate';
 
 import {
   getUsers,
-  createUser,
   getUserById,
   patchUser,
   patchAvatar,
-  loginUser,
   getMe,
 } from '../controllers/users';
 
@@ -24,7 +22,7 @@ router.get(
       userId: Joi.string().required(),
     }),
   }),
-  getUserById
+  getUserById,
 );
 
 router.patch(
@@ -35,7 +33,7 @@ router.patch(
       about: Joi.string().min(2).max(200),
     }),
   }),
-  patchUser
+  patchUser,
 );
 
 router.patch(
@@ -45,8 +43,7 @@ router.patch(
       avatar: Joi.string().required(),
     }),
   }),
-  patchAvatar
+  patchAvatar,
 );
-
 
 export default router;

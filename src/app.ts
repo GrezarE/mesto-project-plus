@@ -1,9 +1,9 @@
-import express, { NextFunction, Request, Response } from 'express';
+import express from 'express';
 import mongoose from 'mongoose';
+import { errors } from 'celebrate';
 import userRouter from './routes/users';
 import cardRouter from './routes/cards';
 import errorHandler from './middlewares/errors';
-import { errors } from 'celebrate';
 import auth from './middlewares/auth';
 import authRouter from './routes/auth';
 import { errorLogger, requestLogger } from './middlewares/logger';
