@@ -2,43 +2,41 @@ import { NextFunction, Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/user';
-import {
-  BadRequestError,
-  UnauthorizedError,
-  NotFoundError,
-  ConflictError,
-} from '../errors/index';
+import { BadRequestError, NotFoundError, ConflictError } from '../errors/index';
 
 export const createUser = (req: Request, res: Response, next: NextFunction) => {
   const {
     name, about, avatar, password, email,
   } = req.body;
-  User.findOne({ email })
-    .then((user) => {
-      if (!user) {
-        bcrypt
-          .hash(password, 15)
-          .then((hash) => User.create({
-            name, about, avatar, password: hash, email,
-          }))
-          .then((newUser) => {
-            res.send(newUser);
-          })
-          .catch((err) => {
-            if (err.name === 'ValidationError') {
-              const error = new BadRequestError(
-                'Переданы некорректные данные при создании пользователя',
-              );
-              next(error);
-            } else {
-              next(err);
-            }
-          });
-      } else {
-        throw new ConflictError('Пользователь с такой почтой уже существует');
-      }
+
+  bcrypt
+    .hash(password, 15)
+    .then((hash) => User.create({
+      name,
+      about,
+      avatar,
+      password: hash,
+      email,
+    }))
+    .then((newUser) => {
+      res.send(newUser);
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.code === 11000) {
+        const error = new ConflictError(
+          'Пользователь с такой почтой уже существует',
+        );
+        next(error);
+      }
+      if (err.name === 'ValidationError') {
+        const error = new BadRequestError(
+          'Переданы некорректные данные при создании пользователя',
+        );
+        next(error);
+      } else {
+        next(err);
+      }
+    });
 };
 
 export const getUsers = (req: Request, res: Response, next: NextFunction) => {
@@ -158,18 +156,15 @@ export const loginUser = (req: Request, res: Response, next: NextFunction) => {
 
   User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, 'some-secret-key');
-      // res.send({
-      //   token: jwt.sign({ _id: user._id }, 'some-secret-key', {
-      //     expiresIn: '7d',
-      //   }),
-      // });
-      res
-        .cookie('token', token, { maxAge: 3600000 * 24 * 7, httpOnly: true })
-        .end();
+      res.send({
+        token: jwt.sign({ _id: user._id }, 'some-secret-key', {
+          expiresIn: '7d',
+        }),
+      });
+      // const token = jwt.sign({ _id: user._id }, 'some-secret-key');
+      // res
+      //   .cookie('token', token, { maxAge: 3600000 * 24 * 7, httpOnly: true })
+      //   .end();
     })
-    .catch((err) => {
-      const error = new UnauthorizedError(err.message);
-      next(error);
-    });
+    .catch(next);
 };

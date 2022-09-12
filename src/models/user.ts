@@ -3,6 +3,7 @@ import mongoose, { Model, Document } from 'mongoose';
 import bcrypt from 'bcryptjs';
 // import isURL from 'validator/lib/isURL';
 import isEmail from 'validator/lib/isEmail';
+import { UnauthorizedError } from '../errors/index';
 
 export interface IUser {
   name: string;
@@ -68,11 +69,11 @@ UserShema.static(
       .select('+password')
       .then((user: IUser) => {
         if (!user) {
-          return Promise.reject(new Error('Неправильные почта или пароль'));
+          throw new UnauthorizedError('Неправильные почта или пароль');
         }
         return bcrypt.compare(password, user.password).then((match) => {
           if (!match) {
-            return Promise.reject(new Error('Неправильные почта или пароль'));
+            throw new UnauthorizedError('Неправильные почта или пароль');
           }
           return user;
         });
