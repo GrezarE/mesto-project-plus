@@ -26,7 +26,7 @@ export const createUser = (req: Request, res: Response, next: NextFunction) => {
         const error = new ConflictError(
           'Пользователь с такой почтой уже существует',
         );
-        next(error);
+        return next(error);
       }
       if (err.name === 'ValidationError') {
         const error = new BadRequestError(
