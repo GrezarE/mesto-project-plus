@@ -8,6 +8,7 @@ import {
   patchAvatar,
   getMe,
 } from '../controllers/users';
+import { checkUrl, checkId } from '../utiles/utiles';
 
 const router = Router();
 
@@ -19,7 +20,7 @@ router.get(
   '/:userId',
   celebrate({
     params: Joi.object().keys({
-      userId: Joi.string().required(),
+      userId: Joi.string().required().custom(checkId),
     }),
   }),
   getUserById,
@@ -40,7 +41,7 @@ router.patch(
   '/me/avatar',
   celebrate({
     body: Joi.object().keys({
-      avatar: Joi.string().required(),
+      avatar: Joi.string().required().custom(checkUrl),
     }),
   }),
   patchAvatar,
