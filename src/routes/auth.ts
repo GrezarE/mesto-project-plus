@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { celebrate, Joi } from 'celebrate';
 
 import { createUser, loginUser } from '../controllers/users';
+import { checkUrl } from '../utiles/utiles';
 
 const router = Router();
 
@@ -13,7 +14,7 @@ router.post(
       email: Joi.string().required(),
       password: Joi.string().required().min(8),
       about: Joi.string().min(2).max(200),
-      avatar: Joi.string(),
+      avatar: Joi.string().custom(checkUrl),
     }),
   }),
   createUser,
