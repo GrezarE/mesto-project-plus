@@ -1,6 +1,6 @@
 import mongoose, { Model, Document } from 'mongoose';
 import bcrypt from 'bcryptjs';
-import isURL from 'validator/lib/isURL';
+// import isURL from 'validator/lib/isURL';
 import isEmail from 'validator/lib/isEmail';
 
 export interface IUser {

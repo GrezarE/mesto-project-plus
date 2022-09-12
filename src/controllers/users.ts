@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import {
@@ -8,8 +8,13 @@ import {
   UNAUTHORIZED,
 } from '../utiles/constants';
 import User from '../models/user';
+import {
+  BadRequestError,
+  UnauthorizedError,
+  NotFoundError,
+} from '../errors/index';
 
-export const createUser = (req: Request, res: Response) => {
+export const createUser = (req: Request, res: Response, next: NextFunction) => {
   const { name, about, avatar, password, email } = req.body;
 
   bcrypt
@@ -20,44 +25,42 @@ export const createUser = (req: Request, res: Response) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(BAD_REQUEST).send({
-          message: 'Переданы некорректные данные при создании пользователя',
-        });
+        const error = new BadRequestError(
+          'Переданы некорректные данные при создании пользователя'
+        );
+        next(error);
       } else {
-        res.status(SERVER_ERROR).send({ message: 'Произошла ошибка сервера' });
+        next(err);
       }
     });
 };
 
-export const getUsers = (req: Request, res: Response) => {
+export const getUsers = (req: Request, res: Response, next: NextFunction) => {
   User.find({})
     .then((users) => {
       res.send(users);
     })
-    .catch(() => {
-      res.status(SERVER_ERROR).send({ message: 'Произошла ошибка' });
-    });
+    .catch(next);
 };
 
-export const getMe = (req: Request, res: Response) => {
+export const getMe = (req: Request, res: Response, next: NextFunction) => {
   const id = req.user._id;
   User.findById(id)
     .then((user) => {
       if (!user) {
-        res
-          .status(NOT_FOUND)
-          .send({ message: 'Пользователь по указанному id не найден' });
+        throw new NotFoundError('Пользователь по указанному id не найден');
       } else {
         res.send(user);
       }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res
-          .status(BAD_REQUEST)
-          .send({ message: 'Id пользователя не прошло валидацию' });
+        const error = new BadRequestError(
+          'Id пользователя не прошло валидацию'
+        );
+        next(error);
       } else {
-        res.status(SERVER_ERROR).send({ message: 'Произошла ошибка' });
+        next(err);
       }
     });
 };
@@ -139,9 +142,8 @@ export const patchAvatar = (req: Request, res: Response) => {
     });
 };
 
-export const loginUser = (req: Request, res: Response) => {
+export const loginUser = (req: Request, res: Response, next: NextFunction) => {
   const { email, password } = req.body;
-  console.log(email, password);
 
   User.findUserByCredentials(email, password)
     .then((user) => {
@@ -151,10 +153,12 @@ export const loginUser = (req: Request, res: Response) => {
       //     expiresIn: '7d',
       //   }),
       // });
-      res.cookie('token', token, { maxAge: 3600000 * 24 * 7, httpOnly: true }).end();
+      res
+        .cookie('token', token, { maxAge: 3600000 * 24 * 7, httpOnly: true })
+        .end();
     })
     .catch((err) => {
-      console.log(err);
-      res.status(UNAUTHORIZED).send({ message: err.message });
+      const error = new UnauthorizedError(err.message);
+      next(error);
     });
 };

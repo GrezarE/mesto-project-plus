@@ -7,6 +7,7 @@ export default (
   res: Response,
   next: NextFunction
 ) => {
+  console.log('Консоль ошибки', err.message, err.statusCode);
   const { statusCode = 500, message } = err;
 
   res.status(statusCode).send({
